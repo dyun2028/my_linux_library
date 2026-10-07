@@ -3,7 +3,10 @@
 #include <sys/socket.h> 
 #include <netinet/in.h>
 #include <string.h>
+//#include <arpa/inet.h>
+#include <unistd.h>
 
+#include <stdbool.h>
 
 #define PORT_NUM 8080
 
@@ -49,7 +52,7 @@ int main(int argc, char* argv[]) {
 		ssize_t valread;
 		char buffer[1024] = {0};	
 		while (true) {
-			memcpy(buffer, 0, sizeof(buffer));
+			memset(buffer, 0, sizeof(buffer));
 			valread = recv(new_socket, buffer, 1024 - 1, 0); //read from client
 			if (valread < 0) {
 				perror("valread");
@@ -71,11 +74,11 @@ int main(int argc, char* argv[]) {
 				printf("sent %s", buffer);
 			}	
 		}
+		close(new_socket);
 	}
-
-	close(new_socket);
-
 	close(server_fd);
+
+
 	return 0;
 	
 }

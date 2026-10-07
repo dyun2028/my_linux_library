@@ -1,11 +1,12 @@
 CC = gcc
-FLAGS = -Wall -Wextra -g -std=c11
-SRC = src/echo_server.c
-TARGET = build/echo_server
+CFLAGS = -Wall -Wextra -g -std=c11 -Iincludes
+SRC = src/echo_server.c src/echo_client.c
+BINS = build/echo_server build/echo_client
 
 .PHONY: clean
-$(TARGET): $(SRC)
-	mkdir -p build
-	$(CC) $(FLAGS) $(SRC) -o $(TARGET)
+all: $(BINS)
+	
+build/%: src/%.c | build
+	$(CC) $(CFLAGS) $< -o $@
 clean:
 	rm -rf build/*

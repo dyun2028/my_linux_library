@@ -1,0 +1,38 @@
+#include <netinet/in.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/socket.h>
+#include <unistd.h> //close
+#include <arpa/inet.h> //inet_pton
+#define PORT_NUM 8080
+int main(int argc, char const* argv[]) {
+	int client_fd;
+	struct sockaddr_in server_addr;
+	//make fd
+	if ((client_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+		perror("client fd not initialized");
+		exit(EXIT_FAILURE);
+	}
+	//make the address family
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_port = htons(PORT_NUM);
+	//convert correct IP. May change the local ip later
+	if (inet_pton(AF_INET, "127.0.0.1", &server_addr.sin_addr) <= 0) {
+		perror("failure to convert IP to socket address");
+		exit(EXIT_FAILURE);
+	}
+	//connect
+	int status;
+	if ((status = connect(client_fd, (struct sockaddr*)&server_addr, sizeof(server_addr))) < 0) {
+		perror("couldn't connect to server");
+		exit(EXIT_FAILURE);
+	}
+	const char* s = "what's up this my message";
+	send(client_fd, s, sizeof(s), 0);
+	char buffer[1024] = { 0 };	
+	recv(client_fd, buffer, 1024 - 1, 0);
+	printf("%s\n", buffer);
+
+	close(client_fd);
+	return 0;
+}

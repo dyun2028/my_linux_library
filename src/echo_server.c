@@ -46,8 +46,9 @@ int main(int argc, char* argv[]) {
 	while (flag) {	
 		int new_socket;
 		if ((new_socket = accept(server_fd, (struct sockaddr*)&addr, &addrlen)) < 0) {
-			perror("ACCEPT");
-			exit(EXIT_FAILURE);	
+			continue;
+			//perror("ACCEPT");
+			//exit(EXIT_FAILURE);	
 		} 
 		ssize_t valread;
 		char buffer[1024] = {0};	
@@ -63,15 +64,15 @@ int main(int argc, char* argv[]) {
 				break;
 			} else {
 				//buffer[valread] = '\0'; //no longer need after memcpy in loop
-				printf("%s\n", buffer); //print it out
 				if (strcmp("exit_all_connections", buffer) == 0) { // TODO remove ts
 					flag = false;
 				} else if (strcmp("exit", buffer) == 0) {
 					break;
 				}
-				char* str = "wsg ;)";
+				char* str = "wsg ;) thanks for the message I'm currently rotting on the chan";
 				send(new_socket, str, strlen(str), 0); //send back
-				printf("sent %s", buffer);
+				//printf("sent %s\n", str);
+				printf("received: %s\n", buffer);
 			}	
 		}
 		close(new_socket);

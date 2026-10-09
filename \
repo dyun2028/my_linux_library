@@ -6,7 +6,6 @@
 #include <arpa/inet.h> //inet_pton
 		       //
 #include <string.h> //strlen
-#include <stdbool.h>
 #define PORT_NUM 8080
 int main(int argc, char const* argv[]) {
 	int client_fd;
@@ -30,30 +29,20 @@ int main(int argc, char const* argv[]) {
 		perror("couldn't connect to server");
 		exit(EXIT_FAILURE);
 	}
-	//char* s = "whatsupthismymessage";
-	char s[100] = {0};
-	while (true) {
-		memset(s, 0, sizeof(s));
-		//scanf("%99s", s); //SKIPS WHITESPACE?? BRUH
-		fgets(s, sizeof(s), stdin);
-
-		if (strcmp(s, "exit") == 0) {
-			break;
-		}
-		int valread;
-		valread = send(client_fd, s, sizeof(s), 0);
-		if (valread < 0) {
-			perror("valread error client");
-			exit(EXIT_FAILURE);
-		} else if (valread == 0) { 
-			//wtf/
-		} else {
-			
-		}
-		char buffer[1024] = { 0 };	
-		recv(client_fd, buffer, 1024 - 1, 0);
-		printf("%s\n", buffer);
+	char* s = "whatsupthismymessage";
+	int valread;
+	valread = send(client_fd, s, strlen(s), 0);
+	if (valread < ) {
+		perror("valread error client");
+		exit(EXIT_FAILURE);
+	} else if (valread == 0) { 
+		//wtf/
+	} else {
+		
 	}
+	char buffer[1024] = { 0 };	
+	recv(client_fd, buffer, 1024 - 1, 0);
+	printf("%s\n", buffer);
 
 	close(client_fd);
 	return 0;

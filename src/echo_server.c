@@ -42,35 +42,37 @@ int main(int argc, char* argv[]) {
 		perror("LISTEN");
 		exit(EXIT_FAILURE);
 	}	
-	bool flag = true;
-	while (flag) {	
+
+	while (true) {
 		int new_socket;
 		if ((new_socket = accept(server_fd, (struct sockaddr*)&addr, &addrlen)) < 0) {
+			perror("Failed to accept connection");
 			continue;
-			//perror("ACCEPT");
-			//exit(EXIT_FAILURE);	
 		} 
+		printf("Client connected\n");
 		ssize_t valread;
 		char buffer[1024] = {0};	
 		while (true) {
 			memset(buffer, 0, sizeof(buffer));
 			valread = recv(new_socket, buffer, 1024 - 1, 0); //read from client
 			if (valread < 0) {
-				perror("valread");
-				close(new_socket);
-				exit(EXIT_FAILURE);
+				perror("Weird error with client receiving");
+				break;
 			} else if (valread == 0) {
-				printf("Client disconnected");
+				printf("Client disconnected\n");
 				break;
 			} else {
 				//buffer[valread] = '\0'; //no longer need after memcpy in loop
-				if (strcmp("exit_all_connections", buffer) == 0) { // TODO remove ts
-					flag = false;
-				} else if (strcmp("exit", buffer) == 0) {
+				if (strcmp("exit", buffer) == 0) {
 					break;
 				}
 				char* str = "wsg ;) thanks for the message I'm currently rotting on the chan";
-				send(new_socket, str, strlen(str), 0); //send back
+				valread = send(new_socket, str, strlen(str), MSG_NOSIGNAL); //send back TODO, MSG_NOSIGNAL yields error instead of SIGPIPE if fail. Helps on other clients I guess
+				if (valread < 0) {
+					perror("Failed to send to client");
+					break;
+				}
+
 				//printf("sent %s\n", str);
 				printf("received: %s\n", buffer);
 			}	

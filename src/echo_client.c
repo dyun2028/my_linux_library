@@ -9,8 +9,11 @@
 #include <stdbool.h>
 #define PORT_NUM 8080
 int main(int argc, char const* argv[]) {
+	(void) argc;
+	(void) argv;
 	int client_fd;
 	struct sockaddr_in server_addr;
+	memset(&server_addr, 0, sizeof(server_addr));
 	//make fd
 	if ((client_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 		perror("client fd not initialized");
@@ -35,26 +38,38 @@ int main(int argc, char const* argv[]) {
 	while (true) {
 		memset(s, 0, sizeof(s));
 		//scanf("%99s", s); //SKIPS WHITESPACE?? BRUH
-		fgets(s, sizeof(s), stdin);
+		if (fgets(s, sizeof(s), stdin) == NULL) {
+			break;
+		}
 
+		s[strcspn(s, "\n")] = '\0';
 		if (strcmp(s, "exit") == 0) {
 			break;
 		}
+		if (strlen(s) == 0) {
+			continue;
+		}
 		int valread;
-		valread = send(client_fd, s, sizeof(s), 0);
+		valread = send(client_fd, s, strlen(s), MSG_NOSIGNAL);
+		if (valread < 0) {
+			perror("Send failed. Try again");
+			continue;
+		} 
+
+	 	char buffer[1024] = { 0 };	
+		valread = recv(client_fd, buffer, 1024 - 1, 0);
 		if (valread < 0) {
 			perror("valread error client");
 			exit(EXIT_FAILURE);
-		} else if (valread == 0) { 
-			//wtf/
-		} else {
-			
+		} else if (valread == 0) {
+			printf("Server shut down\n");			
+			break;
 		}
-		char buffer[1024] = { 0 };	
-		recv(client_fd, buffer, 1024 - 1, 0);
+
 		printf("%s\n", buffer);
 	}
 
+	printf("Closing FD\n");
 	close(client_fd);
 	return 0;
 }
